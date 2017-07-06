@@ -1,14 +1,12 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Bubble_Bash
 {
     public class Bubble
-    {
-        //public static Brush RedBrush = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0));
-        //public static Brush GreenBrush = new SolidColorBrush(Color.FromArgb(100, 0, 255, 0));
-        //public static Brush BlueBrush = new SolidColorBrush(Color.FromArgb(100, 0, 0, 255));
-
+    {  
+        #region Properties
         private Color color;
         public Color BubbleColor
         {
@@ -36,17 +34,23 @@ namespace Bubble_Bash
             get { return timeToDissappear; }
             set { timeToDissappear = value; }
         }
+        private DateTime created;
+        public DateTime Created
+        {
+            get { return created; }
+            set { created = value; }
+        }
+        #endregion
 
-
-        public Bubble(Color color,Point position, double size, int time)
+        #region Constructor
+        public Bubble(Color color, Point position, double size, int time)
         {
             this.color = color;
             this.position = position;
             this.size = size;
             this.timeToDissappear = time;
-
-        }
-
-
+            this.Created = DateTime.Now;
+        } 
+        #endregion
     }
 }

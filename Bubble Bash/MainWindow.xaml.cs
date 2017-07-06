@@ -24,21 +24,19 @@ namespace Bubble_Bash
 {
     public partial class MainWindow : Window
     {
+        #region Properties
         private KinectSensor kinectSensor = null;
 
-        private ColorFrameReader colorFrameReader = null;       
+        private ColorFrameReader colorFrameReader = null;
         private BodyFrameReader bodyFrameReader = null;
         private CoordinateMapper coordinateMapper = null;
 
-        //private const double HandSize = 50;
         private double handSize = 50;
-
         public double HandSize
         {
             get { return handSize; }
             set { handSize = value; }
         }
-
 
         private static readonly Brush handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
         private static readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
@@ -48,12 +46,19 @@ namespace Bubble_Bash
         private int displayWidth;
         private int displayHeight;
         private DrawingGroup drawingGroup;
-        private DrawingImage imageSource;
+
         private WriteableBitmap colorBitmap = null;
 
         private const float InferredZPositionClamp = 0.1f;
         private GameController gameController;
         private Thread gameThread;
+
+        private DrawingImage imageSource;
+        public ImageSource getImageSource
+        {
+            get { return this.imageSource; }
+        } 
+        #endregion
 
         public MainWindow()
         {
@@ -106,12 +111,11 @@ namespace Bubble_Bash
 
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
             this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
-            
-            this.colorBitmap = new WriteableBitmap(colorFrameDescription.Width , colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+
+            this.colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
 
             this.displayWidth = colorFrameDescription.Width;
             this.displayHeight = colorFrameDescription.Height;
-
             this.kinectSensor.Open();
 
             this.drawingGroup = new DrawingGroup();
@@ -150,6 +154,7 @@ namespace Bubble_Bash
                 }
             }
         }
+
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
@@ -179,7 +184,7 @@ namespace Bubble_Bash
                     bool noHandTracked = true;
                     foreach (Body body in this.bodies)
                     {
-                        
+
                         if (body.IsTracked)
                         {
                             if (!this.gameController.hasPlayerFor(body))
@@ -206,25 +211,28 @@ namespace Bubble_Bash
             }
         }
 
-        
-
         private void drawScore(DrawingContext dc)
         {
-            var typeface = new Typeface(new FontFamily("Verdana"),FontStyles.Normal,FontWeights.Heavy,FontStretches.Normal);
+            var typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
             Brush brush = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
             String playerOneScore = "Player 1\n";
-            if(gameController.PlayerOne != null)
+            if (gameController.PlayerOne != null)
             {
                 playerOneScore += gameController.PlayerOne.score;
             }
-            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush),new Point(0,0));
+            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush), new Point(0, 0));
 
             String playerTwoScore = "Player 2\n";
             if (gameController.PlayerTwo != null)
             {
                 playerTwoScore += gameController.PlayerTwo.score;
             }
-            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, brush), new Point(1920, 0));
+            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, brush), new Point(displayWidth, 0));
+
+            if (gameController.GameState == GameController.State.PAUSE)
+            {
+                dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush),new Point(displayWidth/2-110,displayHeight/2));
+            }
         }
 
         private void drawBubbles(DrawingContext dc)
@@ -240,13 +248,13 @@ namespace Bubble_Bash
 
         }
 
-        public ImageSource getImageSource
+        private static void DrawBubble(Bubble bubble, DrawingContext drawingContext)
         {
-            get
-            {
-                return this.imageSource;
-            }
+            Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
+            Pen pen = new Pen(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 5);
+            drawingContext.DrawEllipse(brush, pen, new Point(bubble.BubblePosition.X, bubble.BubblePosition.Y), bubble.BubbleSize, bubble.BubbleSize);
         }
+
         public Point getPoint(JointType type, Body body)
         {
             CameraSpacePoint jointPosition = body.Joints[type].Position;
@@ -274,11 +282,6 @@ namespace Bubble_Bash
                     drawingContext.DrawEllipse(handLassoBrush, null, handPosition, HandSize, HandSize);
                     break;
             }
-        }
-        private static void DrawBubble(Bubble bubble, DrawingContext drawingContext)
-        {
-            Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
-            drawingContext.DrawEllipse(brush, null, new Point(bubble.BubblePosition.X, bubble.BubblePosition.Y), bubble.BubbleSize, bubble.BubbleSize);
-        }
+        }      
     }
 }

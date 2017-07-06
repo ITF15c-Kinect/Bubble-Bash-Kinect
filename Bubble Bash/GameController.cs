@@ -9,35 +9,75 @@ namespace Bubble_Bash
 {
     public class GameController
     {
+        #region Properties
         public enum State
         {
             TUTORIAL, RUNNING, PAUSE
         }
 
+        public State GameState
+        {
+            get { return state; }
+            set { state = value; }
+        }
+
         public List<Player> Players = new List<Player>();
         private Player playerOne = null;
+
+        public Player PlayerOne
+        {
+            get { return playerOne; }
+            set { playerOne = value; }
+        }
         private Player playerTwo = null;
+
+        public Player PlayerTwo
+        {
+            get { return playerTwo; }
+            set { playerTwo = value; }
+        }
         private List<Bubble> bubbles = new List<Bubble>();
+
+        public List<Bubble> Bubbles
+        {
+            get { return bubbles; }
+            set { bubbles = value; }
+        }
+
         private bool running;
         private Random rnd;
 
-        private int bubbleMaxRadius = 65;
         private int bubbleMinRadius = 35;
+        private int bubbleMaxRadius = 65;
 
-        private int bubbleSpawnRate = 1500;
+        private int bubbleSpawnRate = 1000;
         private int maxBubbles = 100;
 
         private int spawnXMin = 300;
         private int spawnXMax = 1620;
         private int spawnYMax = 980;
 
+        private int bubbleMinTime = 2000;
+        private int bubbleMaxTime = 5000;
+
+        private DateTime lastBubbleSpawnedAt;
+        private MainWindow window;
+
+        private Color BubbleColorRed = Color.FromRgb(255, 0, 0);
+        private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
+        private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
+
+        private State state = State.PAUSE;
+        #endregion
+
+        #region Constructor
         public GameController(MainWindow window)
         {
             this.window = window;
             this.rnd = new Random();
-        }
-
-        private State state = State.PAUSE;
+        } 
+        #endregion
+    
         public void run()
         {
             initialize();
@@ -50,6 +90,7 @@ namespace Bubble_Bash
                     checkPlayerState();
                     if (GameState == State.RUNNING)
                     {
+                        despawnBubbles();
                         spawnBubbles();
                         detectCollisions();
                     }
@@ -61,6 +102,10 @@ namespace Bubble_Bash
             {
                 throw ex;
             }
+        }
+
+        private void initialize()
+        {
         }
 
         private void checkPlayerState()
@@ -90,11 +135,7 @@ namespace Bubble_Bash
                 }
             }
         }
-
-        private void initialize()
-        {
-        }
-
+     
         private void detectCollisions()
         {
             lock (Bubbles)
@@ -132,7 +173,15 @@ namespace Bubble_Bash
             if ((Point.Subtract(leftHand, bubble.BubblePosition).Length < window.HandSize + bubble.BubbleSize && gestureMatches(player.body.HandLeftState, bubble))
                  || (Point.Subtract(rightHand, bubble.BubblePosition).Length < window.HandSize + bubble.BubbleSize && gestureMatches(player.body.HandRightState, bubble)))
             {
-                player.score += 50;
+
+                double bubbleRadiusRange = (this.bubbleMaxRadius - this.bubbleMinRadius);
+                double bubbleTimeRange = (this.bubbleMaxTime - this.bubbleMinTime);
+
+
+
+                player.score += (int)(10 + 45 * (1.0 / bubbleRadiusRange * bubble.BubbleSize - (this.bubbleMinRadius / bubbleRadiusRange)) +
+                    45 * (1.0 / bubbleTimeRange * bubble.TimeToDisappear - (this.bubbleMinTime / bubbleTimeRange)));
+
                 Console.WriteLine(player.body.TrackingId + ": Score " + player.score);
                 return true;
             }
@@ -152,62 +201,7 @@ namespace Bubble_Bash
                 default:
                     return false;
             }
-        }
-
-        private DateTime lastBubbleSpawnedAt;
-        private MainWindow window;
-
-        public List<Bubble> Bubbles
-        {
-            get
-            {
-                return bubbles;
-            }
-
-            set
-            {
-                bubbles = value;
-            }
-        }
-
-        public State GameState
-        {
-            get
-            {
-                return state;
-            }
-
-            set
-            {
-                state = value;
-            }
-        }
-
-        public Player PlayerOne
-        {
-            get
-            {
-                return playerOne;
-            }
-
-            set
-            {
-                playerOne = value;
-            }
-        }
-
-        public Player PlayerTwo
-        {
-            get
-            {
-                return playerTwo;
-            }
-
-            set
-            {
-                playerTwo = value;
-            }
-        }
+        }          
 
         private void spawnBubbles()
         {
@@ -219,7 +213,7 @@ namespace Bubble_Bash
                 {
                     if (Bubbles.Count < maxBubbles && (lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
                     {
-                        Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius), 5000);
+                        Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius + 1), rnd.Next(bubbleMinTime, bubbleMaxTime + 1));
                         this.Bubbles.Add(bubble);
 
                         lastBubbleSpawnedAt = now;
@@ -233,15 +227,24 @@ namespace Bubble_Bash
             }
         }
 
+        private void despawnBubbles()
+        {
+            lock (Bubbles)
+            {
+                Bubbles.RemoveAll(shouldDespawn);
+            }
+        }
+
+        private static bool shouldDespawn(Bubble bubble)
+        {
+            return (DateTime.Now - bubble.Created > new TimeSpan(0, 0, 0, 0, bubble.TimeToDisappear));
+        }
+
         private Point randomPosition()
         {
             return new Point(rnd.Next(spawnXMin, spawnXMax), rnd.Next(bubbleMaxRadius, spawnYMax));
         }
-
-        private Color BubbleColorRed = Color.FromRgb(255, 0, 0);
-        private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
-        private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
-
+        
         private Color randomColor()
         {
             int n = rnd.Next(1, 4);
