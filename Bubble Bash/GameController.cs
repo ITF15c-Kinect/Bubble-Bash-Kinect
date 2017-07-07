@@ -50,7 +50,7 @@ namespace Bubble_Bash
         private int bubbleMinRadius = 35;
         private int bubbleMaxRadius = 65;
 
-        private int bubbleSpawnRate = 1000;
+        private int bubbleSpawnRate = 700;
         private int maxBubbles = 100;
 
         private int spawnXMin = 300;
