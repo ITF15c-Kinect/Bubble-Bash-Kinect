@@ -250,14 +250,20 @@ namespace Bubble_Bash
 
         private static void DrawBubble(Bubble bubble, DrawingContext drawingContext)
         {
-            //Brush brush = new LinearGradientBrush((Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B), Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B),);
-            Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
+            Color white = new Color();
+
+            white = Color.FromArgb(100, 255, 255, 255);
+            
+            //Brush brush = new LinearGradientBrush(white, bubble.BubbleColor, 45);
+            Brush brush = new RadialGradientBrush(white, bubble.BubbleColor);
+            //Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
+
             Pen pen = new Pen(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 5);
             drawingContext.DrawEllipse(brush, pen, new Point(bubble.BubblePosition.X, bubble.BubblePosition.Y), bubble.BubbleSize, bubble.BubbleSize);
 
-            Brush whiteBrush = new SolidColorBrush(Color.FromArgb(100,255,255,255));
-            Point reflectionPoint = new Point(bubble.BubblePosition.X - bubble.BubbleSize / 2.5, bubble.BubblePosition.Y - bubble.BubbleSize / 3);
-            drawingContext.DrawEllipse(whiteBrush, null, reflectionPoint, bubble.BubbleSize/3, bubble.BubbleSize / 3);
+            //Brush whiteBrush = new SolidColorBrush(Color.FromArgb(100,255,255,255));
+            //Point reflectionPoint = new Point(bubble.BubblePosition.X - bubble.BubbleSize / 2.5, bubble.BubblePosition.Y - bubble.BubbleSize / 3);
+            //drawingContext.DrawEllipse(brush2, null, reflectionPoint, bubble.BubbleSize/3, bubble.BubbleSize / 3);
         }
 
         public Point getPoint(JointType type, Body body)

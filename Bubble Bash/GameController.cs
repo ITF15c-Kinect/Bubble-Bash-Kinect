@@ -58,7 +58,7 @@ namespace Bubble_Bash
         private int spawnYMax = 980;
 
         private int bubbleMinTime = 2000;
-        private int bubbleMaxTime = 5000;
+        private int bubbleMaxTime = 4500;
 
         private DateTime lastBubbleSpawnedAt;
         private MainWindow window;
@@ -91,6 +91,7 @@ namespace Bubble_Bash
                     if (GameState == State.RUNNING)
                     {
                         despawnBubbles();
+                        fadeOut();
                         spawnBubbles();
                         detectCollisions();
                     }
@@ -101,6 +102,17 @@ namespace Bubble_Bash
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        private void fadeOut()
+        {
+            lock (Bubbles)
+            {
+                foreach (var bubble in Bubbles)
+                {
+                    bubble.BubbleColor = Color.FromArgb((byte) (bubble.BubbleColor.A - 1.5), bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B);
+                }
             }
         }
 
@@ -193,11 +205,11 @@ namespace Bubble_Bash
             switch (handState)
             {
                 case HandState.Open:
-                    return bubble.BubbleColor.Equals(BubbleColorGreen);
+                    return bubble.BubbleColor.G.Equals(BubbleColorGreen.G);
                 case HandState.Lasso:
-                    return bubble.BubbleColor.Equals(BubbleColorBlue);
+                    return bubble.BubbleColor.B.Equals(BubbleColorBlue.B);
                 case HandState.Closed:
-                    return bubble.BubbleColor.Equals(BubbleColorRed);
+                    return bubble.BubbleColor.R.Equals(BubbleColorRed.R);
                 default:
                     return false;
             }
@@ -283,10 +295,12 @@ namespace Bubble_Bash
             if (PlayerOne == null)
             {
                 PlayerOne = player;
+                Console.WriteLine("PlayerOne:" + PlayerOne.body.TrackingId);
             }
             else if (PlayerTwo == null)
             {
                 PlayerTwo = player;
+                Console.WriteLine("PlayerTwo:" + PlayerTwo.body.TrackingId);
             }
         }
     }
