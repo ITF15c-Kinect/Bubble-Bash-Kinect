@@ -158,7 +158,7 @@ namespace Bubble_Bash
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
-
+            
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
                 if (bodyFrame != null)
@@ -178,6 +178,10 @@ namespace Bubble_Bash
                 using (DrawingContext dc = this.drawingGroup.Open())
                 {
                     dc.DrawImage(this.colorBitmap, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    if (gameController.GameState == GameController.State.RUNNING)
+                    {
+
+                    }
                     drawBubbles(dc);
                     drawScore(dc);
 
@@ -194,19 +198,21 @@ namespace Bubble_Bash
                             DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), dc);
                             DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), dc);
                             noHandTracked = false;
+
+                            if (body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
+                            {
+                                this.imageMenuScreen.Opacity = 0;
+                                this.gameController.GameState = GameController.State.RUNNING;
+                            }
                         }
                     }
 
-                    if (noHandTracked)
+                    if (noHandTracked && gameController.GameState != GameController.State.MENU)
                     {
                         this.gameController.GameState = GameController.State.PAUSE;
                     }
-                    else
-                    {
-                        this.gameController.GameState = GameController.State.RUNNING;
-                    }
 
-                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    //this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
         }
@@ -229,7 +235,7 @@ namespace Bubble_Bash
             }
             dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, brush), new Point(displayWidth, 0));
 
-            if (gameController.GameState == GameController.State.PAUSE)
+            if (gameController.GameState == GameController.State.PAUSE )
             {
                 dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush),new Point(displayWidth/2-110,displayHeight/2));
             }

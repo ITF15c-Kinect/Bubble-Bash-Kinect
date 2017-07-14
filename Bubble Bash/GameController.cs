@@ -12,7 +12,7 @@ namespace Bubble_Bash
         #region Properties
         public enum State
         {
-            TUTORIAL, RUNNING, PAUSE
+            MENU, RUNNING, PAUSE
         }
 
         public State GameState
@@ -67,7 +67,8 @@ namespace Bubble_Bash
         private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
         private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
 
-        private State state = State.PAUSE;
+        //private State state = State.PAUSE;
+        private State state = State.MENU;
         #endregion
 
         #region Constructor
@@ -89,7 +90,8 @@ namespace Bubble_Bash
                     int startTime = DateTime.Now.Millisecond;
                     checkPlayerState();
                     if (GameState == State.RUNNING)
-                    {
+                    {        
+                                        
                         despawnBubbles();
                         fadeOut();
                         spawnBubbles();
@@ -146,6 +148,14 @@ namespace Bubble_Bash
                     }
                 }
             }
+
+            if ((PlayerOne == null || !PlayerOne.body.IsTracked)
+                && PlayerTwo != null && PlayerTwo.body.IsTracked)
+            {
+                PlayerOne = PlayerTwo;
+                PlayerTwo = null;
+            }
+                
         }
      
         private void detectCollisions()
