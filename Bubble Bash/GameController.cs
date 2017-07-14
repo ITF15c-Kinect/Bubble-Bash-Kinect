@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows;
+using System.Media;
 
 namespace Bubble_Bash
 {
@@ -104,7 +105,9 @@ namespace Bubble_Bash
         private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
         private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
 
-        //private State state = State.PAUSE;
+        //private SoundPlayer popSound = new SoundPlayer("/Bubble Bash;component/Resources/Blop-Mark_DiAngelo-79054334.wav");
+        private SoundPlayer popSound = new SoundPlayer(Properties.Resources.Popsound);
+
         private State state = State.MENU;
         #endregion
 
@@ -245,6 +248,8 @@ namespace Bubble_Bash
                     45 * (1.0 / bubbleTimeRange * bubble.TimeToDisappear - (this.bubbleMinTime / bubbleTimeRange)));
 
                 Console.WriteLine(player.body.TrackingId + ": Score " + player.score);
+                this.popSound.Play();
+
                 return true;
             }
             return false;
