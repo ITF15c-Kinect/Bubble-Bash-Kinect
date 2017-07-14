@@ -197,6 +197,7 @@ namespace Bubble_Bash
                             if (body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
                             {
                                 this.imageMenuScreen.Opacity = 0;
+                                this.imageMenuScreenBG.Opacity = 0;
                                 this.gameController.GameState = GameController.State.RUNNING;
                             }
                         }

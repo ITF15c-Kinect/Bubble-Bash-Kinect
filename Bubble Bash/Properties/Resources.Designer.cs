@@ -82,9 +82,9 @@ namespace Bubble_Bash.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Startscreen1 {
+        internal static System.Drawing.Bitmap Startscreen_BG {
             get {
-                object obj = ResourceManager.GetObject("Startscreen1", resourceCulture);
+                object obj = ResourceManager.GetObject("Startscreen_BG", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -92,9 +92,9 @@ namespace Bubble_Bash.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Test {
+        internal static System.Drawing.Bitmap Startscreen1 {
             get {
-                object obj = ResourceManager.GetObject("Test", resourceCulture);
+                object obj = ResourceManager.GetObject("Startscreen1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

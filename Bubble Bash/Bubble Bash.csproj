@@ -116,13 +116,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Startscreen.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Startscreen.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Test.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -138,6 +132,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Popsound.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Startscreen BG.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Startscreen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

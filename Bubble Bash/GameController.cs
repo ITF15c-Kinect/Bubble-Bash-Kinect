@@ -105,7 +105,6 @@ namespace Bubble_Bash
         private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
         private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
 
-        //private SoundPlayer popSound = new SoundPlayer("/Bubble Bash;component/Resources/Blop-Mark_DiAngelo-79054334.wav");
         private SoundPlayer popSound = new SoundPlayer(Properties.Resources.Popsound);
 
         private State state = State.MENU;
@@ -121,7 +120,6 @@ namespace Bubble_Bash
 
         public void run()
         {
-            initialize();
             this.running = true;
             try
             {
@@ -161,9 +159,6 @@ namespace Bubble_Bash
             }
         }
 
-        private void initialize()
-        {
-        }
 
         private void checkPlayerState()
         {

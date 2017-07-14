@@ -17,6 +17,7 @@
         <Viewbox HorizontalAlignment="Center" Height="Auto" Margin="0 0 0 0" VerticalAlignment="Top" Width="Auto">
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
         </Viewbox>
-        <Image x:Name="imageMenuScreen" Source="/Bubble Bash;component/Resources/Startscreen.jpg" Stretch="UniformToFill" Opacity="0.8" RenderTransformOrigin="0.55,0.472" />
+        <Image x:Name="imageMenuScreenBG" Source="/Bubble Bash;component/Resources/Startscreen BG.jpg" Stretch="UniformToFill" Opacity="0.8" RenderTransformOrigin="0.55,0.472" />
+        <Image x:Name="imageMenuScreen" Source="/Bubble Bash;component/Resources/Startscreen.png" RenderTransformOrigin="0.55,0.472" />
     </Grid>
 </Window>
