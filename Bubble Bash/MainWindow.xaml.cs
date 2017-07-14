@@ -31,17 +31,13 @@ namespace Bubble_Bash
         private BodyFrameReader bodyFrameReader = null;
         private CoordinateMapper coordinateMapper = null;
 
-        private double handSize = 50;
-        public double HandSize
-        {
-            get { return handSize; }
-            set { handSize = value; }
-        }
+        public double HandSize { get; set; }
 
         private static readonly Brush handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
         private static readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
         private static readonly Brush handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
-        private Body[] bodies = null;
+        public Body[] Bodies { get; internal set; }
+        #endregion
 
         private int displayWidth;
         private int displayHeight;
@@ -53,16 +49,19 @@ namespace Bubble_Bash
         private GameController gameController;
         private Thread gameThread;
 
-        private DrawingImage imageSource;
-        public ImageSource getImageSource
-        {
-            get { return this.imageSource; }
-        } 
-        #endregion
+        private Typeface typeface;
+        private SolidColorBrush textBrush;
+
+        public ImageSource ImageSource { get; internal set; }
+
+
 
         public MainWindow()
         {
+            HandSize = 50;
             this.gameController = new GameController(this);
+            typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
+            textBrush = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
             startGameThread();
             InitializeKinect();
             InitializeComponent();
@@ -120,7 +119,7 @@ namespace Bubble_Bash
 
             this.drawingGroup = new DrawingGroup();
 
-            this.imageSource = new DrawingImage(this.drawingGroup);
+            this.ImageSource = new DrawingImage(this.drawingGroup);
 
             this.DataContext = this;
         }
@@ -158,17 +157,17 @@ namespace Bubble_Bash
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
-            
+
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
                 if (bodyFrame != null)
                 {
-                    if (this.bodies == null)
+                    if (this.Bodies == null)
                     {
-                        this.bodies = new Body[bodyFrame.BodyCount];
+                        this.Bodies = new Body[bodyFrame.BodyCount];
                     }
 
-                    bodyFrame.GetAndRefreshBodyData(this.bodies);
+                    bodyFrame.GetAndRefreshBodyData(this.Bodies);
                     dataReceived = true;
                 }
             }
@@ -178,15 +177,11 @@ namespace Bubble_Bash
                 using (DrawingContext dc = this.drawingGroup.Open())
                 {
                     dc.DrawImage(this.colorBitmap, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                    if (gameController.GameState == GameController.State.RUNNING)
-                    {
-
-                    }
-                    drawBubbles(dc);
-                    drawScore(dc);
+                    drawPlayerHands(gameController.PlayerOne,1, dc);
+                    drawPlayerHands(gameController.PlayerTwo,2, dc);
 
                     bool noHandTracked = true;
-                    foreach (Body body in this.bodies)
+                    foreach (Body body in this.Bodies)
                     {
 
                         if (body.IsTracked)
@@ -195,8 +190,8 @@ namespace Bubble_Bash
                             {
                                 this.gameController.addPlayer(new Player(body));
                             }
-                            DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), dc);
-                            DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), dc);
+                            //DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), dc);
+                            //DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), dc);
                             noHandTracked = false;
 
                             if (body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
@@ -207,37 +202,90 @@ namespace Bubble_Bash
                         }
                     }
 
-                    if (noHandTracked && gameController.GameState != GameController.State.MENU)
+                    switch (gameController.GameState)
+                    {
+                        case GameController.State.PAUSE:
+                        case GameController.State.RUNNING:
+                            drawBubbles(dc);
+                            drawScore(dc);
+                            drawTimer(dc);
+                            break;
+                        case GameController.State.SCOREBOARD:
+                            drawScore(dc);
+                            drawScoreboard(dc);
+                            break;
+                    }
+
+
+
+                    if (noHandTracked && gameController.GameState == GameController.State.RUNNING)
                     {
                         this.gameController.GameState = GameController.State.PAUSE;
                     }
 
-                    //this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
         }
 
-        private void drawScore(DrawingContext dc)
+        private void drawTimer(DrawingContext dc)
         {
             var typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
             Brush brush = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
+            String timer = gameController.getGameTime().ToString();
+            dc.DrawText(new FormattedText(timer, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush), new Point(displayWidth / 2, 0));
+        }
+
+        private void drawScoreboard(DrawingContext dc)
+        {
+            if (gameController.PlayerOne != null && gameController.PlayerTwo != null)
+            {
+                String winnerText = "Winner is Player ";
+                if (gameController.PlayerOne.score > gameController.PlayerTwo.score)
+                {
+                    winnerText += "1\nwith " + gameController.PlayerOne.score + " points!";
+                }
+                else
+                {
+                    winnerText += "2\nwith " + gameController.PlayerTwo.score + " points!"; ;
+                }
+                dc.DrawText(new FormattedText(winnerText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 72, textBrush), new Point(displayWidth / 2 - 350, displayHeight / 2 - 100));
+            }
+            else
+            {
+                dc.DrawText(new FormattedText("Your Score:\n" + gameController.PlayerOne.score, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 72, textBrush), new Point(displayWidth / 2 - 410, displayHeight / 2 - 100));
+            }
+        }
+
+        private void drawPlayerHands(Player player, int playerNumber, DrawingContext dc)
+        {
+            if (player == null)
+                return;
+            Body body = player.body;
+            DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), playerNumber, dc);
+            DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), playerNumber, dc);
+        }
+
+        private void drawScore(DrawingContext dc)
+        {
             String playerOneScore = "Player 1\n";
             if (gameController.PlayerOne != null)
             {
                 playerOneScore += gameController.PlayerOne.score;
             }
-            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush), new Point(0, 0));
+            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, textBrush), new Point(0, 0));
 
             String playerTwoScore = "Player 2\n";
             if (gameController.PlayerTwo != null)
             {
                 playerTwoScore += gameController.PlayerTwo.score;
             }
-            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, brush), new Point(displayWidth, 0));
+            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, textBrush), new Point(displayWidth, 0));
 
-            if (gameController.GameState == GameController.State.PAUSE )
+
+            if (gameController.GameState == GameController.State.PAUSE)
             {
-                dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush),new Point(displayWidth/2-110,displayHeight/2));
+                dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, textBrush), new Point(displayWidth / 2 - 110, displayHeight / 2));
             }
         }
 
@@ -259,7 +307,7 @@ namespace Bubble_Bash
             Color white = new Color();
 
             white = Color.FromArgb(100, 255, 255, 255);
-            
+
             //Brush brush = new LinearGradientBrush(white, bubble.BubbleColor, 45);
             Brush brush = new RadialGradientBrush(white, bubble.BubbleColor);
             //Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
@@ -283,22 +331,28 @@ namespace Bubble_Bash
             return new Point(jointColorSpacePoint.X, jointColorSpacePoint.Y);
         }
 
-        private void DrawHand(HandState handState, Point handPosition, DrawingContext drawingContext)
+        private void DrawHand(HandState handState, Point handPosition, int playerNumber, DrawingContext drawingContext)
         {
+            Point p = handPosition;
+            p.X -= 10;
+            p.Y -= 20;
             switch (handState)
             {
                 case HandState.Closed:
                     drawingContext.DrawEllipse(handClosedBrush, null, handPosition, HandSize, HandSize);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
                     break;
 
                 case HandState.Open:
                     drawingContext.DrawEllipse(handOpenBrush, null, handPosition, HandSize, HandSize);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
                     break;
 
                 case HandState.Lasso:
                     drawingContext.DrawEllipse(handLassoBrush, null, handPosition, HandSize, HandSize);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
                     break;
             }
-        }      
+        }
     }
 }

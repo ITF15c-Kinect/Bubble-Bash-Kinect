@@ -12,13 +12,48 @@ namespace Bubble_Bash
         #region Properties
         public enum State
         {
-            MENU, RUNNING, PAUSE
+            MENU, RUNNING, PAUSE, SCOREBOARD
         }
 
         public State GameState
         {
             get { return state; }
-            set { state = value; }
+            set
+            {
+
+                switch (value)
+                {
+                    case State.RUNNING:
+                        if(state == State.SCOREBOARD)
+                        {
+                            resetPlayerScore();
+                        }
+                        watch.Start();
+                        break;
+                    case State.PAUSE:
+                        watch.Stop();
+                        break;
+                    case State.SCOREBOARD:
+                        watch.Reset();
+                        break;
+                }
+                state = value;
+            }
+        }
+
+        private void resetPlayerScore()
+        {
+            foreach (Player player in Players)
+            {
+                player.score = 0;
+            }
+        }
+
+        private Stopwatch watch = new Stopwatch();
+
+        public int getGameTime()
+        {
+            return (int) ((GameDuration - watch.ElapsedMilliseconds) / 1000);
         }
 
         public List<Player> Players = new List<Player>();
@@ -43,6 +78,8 @@ namespace Bubble_Bash
             get { return bubbles; }
             set { bubbles = value; }
         }
+
+        public long GameDuration = 30000;
 
         private bool running;
         private Random rnd;
@@ -76,9 +113,9 @@ namespace Bubble_Bash
         {
             this.window = window;
             this.rnd = new Random();
-        } 
+        }
         #endregion
-    
+
         public void run()
         {
             initialize();
@@ -90,8 +127,11 @@ namespace Bubble_Bash
                     int startTime = DateTime.Now.Millisecond;
                     checkPlayerState();
                     if (GameState == State.RUNNING)
-                    {        
-                                        
+                    {
+                        if(watch.ElapsedMilliseconds > GameDuration)
+                        {
+                            GameState = State.SCOREBOARD;
+                        }
                         despawnBubbles();
                         fadeOut();
                         spawnBubbles();
@@ -113,7 +153,7 @@ namespace Bubble_Bash
             {
                 foreach (var bubble in Bubbles)
                 {
-                    bubble.BubbleColor = Color.FromArgb((byte) (bubble.BubbleColor.A - 1.5), bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B);
+                    bubble.BubbleColor = Color.FromArgb((byte)(bubble.BubbleColor.A - 1.5), bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B);
                 }
             }
         }
@@ -155,9 +195,9 @@ namespace Bubble_Bash
                 PlayerOne = PlayerTwo;
                 PlayerTwo = null;
             }
-                
+
         }
-     
+
         private void detectCollisions()
         {
             lock (Bubbles)
@@ -223,7 +263,7 @@ namespace Bubble_Bash
                 default:
                     return false;
             }
-        }          
+        }
 
         private void spawnBubbles()
         {
@@ -266,7 +306,7 @@ namespace Bubble_Bash
         {
             return new Point(rnd.Next(spawnXMin, spawnXMax), rnd.Next(bubbleMaxRadius, spawnYMax));
         }
-        
+
         private Color randomColor()
         {
             int n = rnd.Next(1, 4);
