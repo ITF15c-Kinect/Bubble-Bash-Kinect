@@ -5,9 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bubble_Bash"
         mc:Ignorable="d"
-        Title="Bubble Bash Kinect" Height="350" Width="525"
-        Loaded="MainWindow_Loaded"
-        Closing="MainWindow_Closing" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+        Title="Bubble Bash Kinect" Height="350" Width="525"        
+        Closing="MainWindow_Closing" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="BB symbol.ico">
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
         <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />

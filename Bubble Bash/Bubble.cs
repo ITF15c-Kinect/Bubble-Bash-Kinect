@@ -28,11 +28,11 @@ namespace Bubble_Bash
             set { size = value; }
         }
 
-        private int timeToDissappear;
+        private int timeToDisappear;
         public int TimeToDisappear
         {
-            get { return timeToDissappear; }
-            set { timeToDissappear = value; }
+            get { return timeToDisappear; }
+            set { timeToDisappear = value; }
         }
         private DateTime created;
         public DateTime Created
@@ -48,7 +48,7 @@ namespace Bubble_Bash
             this.color = color;
             this.position = position;
             this.size = size;
-            this.timeToDissappear = time;
+            this.timeToDisappear = time;
             this.Created = DateTime.Now;
         } 
         #endregion

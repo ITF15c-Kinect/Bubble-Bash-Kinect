@@ -49,7 +49,7 @@ namespace Bubble_Bash
         private GameController gameController;
         private Thread gameThread;
 
-        private Typeface typeface;
+        private Typeface typeFace;
         private SolidColorBrush textBrush;
 
         public ImageSource ImageSource { get; internal set; }
@@ -60,7 +60,7 @@ namespace Bubble_Bash
         {
             HandSize = 50;
             this.gameController = new GameController(this);
-            typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
+            typeFace = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
             textBrush = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
             startGameThread();
             InitializeKinect();
@@ -71,11 +71,7 @@ namespace Bubble_Bash
         {
             this.gameThread = new Thread(this.gameController.run);
             this.gameThread.Start();
-        }
-
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-        }
+        }        
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
@@ -250,11 +246,11 @@ namespace Bubble_Bash
                 {
                     winnerText += "2\nwith " + gameController.PlayerTwo.score + " points!"; ;
                 }
-                dc.DrawText(new FormattedText(winnerText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 72, textBrush), new Point(displayWidth / 2 - 350, displayHeight / 2 - 100));
+                dc.DrawText(new FormattedText(winnerText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 72, textBrush), new Point(displayWidth / 2 - 350, displayHeight / 2 - 100));
             }
             else
             {
-                dc.DrawText(new FormattedText("Your Score:\n" + gameController.PlayerOne.score, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 72, textBrush), new Point(displayWidth / 2 - 410, displayHeight / 2 - 100));
+                dc.DrawText(new FormattedText("Your Score:\n" + gameController.PlayerOne.score, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 72, textBrush), new Point(displayWidth / 2 - 410, displayHeight / 2 - 100));
             }
         }
 
@@ -274,19 +270,19 @@ namespace Bubble_Bash
             {
                 playerOneScore += gameController.PlayerOne.score;
             }
-            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, textBrush), new Point(0, 0));
+            dc.DrawText(new FormattedText(playerOneScore, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 58, textBrush), new Point(0, 0));
 
             String playerTwoScore = "Player 2\n";
             if (gameController.PlayerTwo != null)
             {
                 playerTwoScore += gameController.PlayerTwo.score;
             }
-            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeface, 58, textBrush), new Point(displayWidth, 0));
+            dc.DrawText(new FormattedText(playerTwoScore, CultureInfo.CurrentCulture, FlowDirection.RightToLeft, typeFace, 58, textBrush), new Point(displayWidth, 0));
 
 
             if (gameController.GameState == GameController.State.PAUSE)
             {
-                dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, textBrush), new Point(displayWidth / 2 - 110, displayHeight / 2));
+                dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 58, textBrush), new Point(displayWidth / 2 - 110, displayHeight / 2));
             }
         }
 
@@ -341,17 +337,17 @@ namespace Bubble_Bash
             {
                 case HandState.Closed:
                     drawingContext.DrawEllipse(handClosedBrush, null, handPosition, HandSize, HandSize);
-                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 30, textBrush), p);
                     break;
 
                 case HandState.Open:
                     drawingContext.DrawEllipse(handOpenBrush, null, handPosition, HandSize, HandSize);
-                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 30, textBrush), p);
                     break;
 
                 case HandState.Lasso:
                     drawingContext.DrawEllipse(handLassoBrush, null, handPosition, HandSize, HandSize);
-                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 30, textBrush), p);
+                    drawingContext.DrawText(new FormattedText(playerNumber.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 30, textBrush), p);
                     break;
             }
         }

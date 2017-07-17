@@ -80,7 +80,7 @@ namespace Bubble_Bash
             set { bubbles = value; }
         }
 
-        public long GameDuration = 30000;
+        public int GameDuration = 45000;
 
         private bool running;
         private Random rnd;
@@ -89,7 +89,7 @@ namespace Bubble_Bash
         private int bubbleMaxRadius = 65;
 
         private int bubbleSpawnRate = 700;
-        private int maxBubbles = 100;
+        //private int maxBubblesCurrentlyActive = 100;
 
         private int spawnXMin = 300;
         private int spawnXMax = 1620;
@@ -101,9 +101,9 @@ namespace Bubble_Bash
         private DateTime lastBubbleSpawnedAt;
         private MainWindow window;
 
-        private Color BubbleColorRed = Color.FromRgb(255, 0, 0);
-        private Color BubbleColorGreen = Color.FromRgb(0, 255, 0);
-        private Color BubbleColorBlue = Color.FromRgb(0, 0, 255);
+        private Color bubbleColorRed = Color.FromRgb(255, 0, 0);
+        private Color bubbleColorGreen = Color.FromRgb(0, 255, 0);
+        private Color bubbleColorBlue = Color.FromRgb(0, 0, 255);
 
         private SoundPlayer popSound = new SoundPlayer(Properties.Resources.Popsound);
 
@@ -255,11 +255,11 @@ namespace Bubble_Bash
             switch (handState)
             {
                 case HandState.Open:
-                    return bubble.BubbleColor.G.Equals(BubbleColorGreen.G);
+                    return bubble.BubbleColor.G.Equals(bubbleColorGreen.G);
                 case HandState.Lasso:
-                    return bubble.BubbleColor.B.Equals(BubbleColorBlue.B);
+                    return bubble.BubbleColor.B.Equals(bubbleColorBlue.B);
                 case HandState.Closed:
-                    return bubble.BubbleColor.R.Equals(BubbleColorRed.R);
+                    return bubble.BubbleColor.R.Equals(bubbleColorRed.R);
                 default:
                     return false;
             }
@@ -273,13 +273,23 @@ namespace Bubble_Bash
 
                 lock (Bubbles)
                 {
-                    if (Bubbles.Count < maxBubbles && (lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
+                    // maxBubblesCurrentlyActive not longer needed
+                    //if (Bubbles.Count < maxBubblesCurrentlyActive && (lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
+                    //{
+                    //    Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius + 1), rnd.Next(bubbleMinTime, bubbleMaxTime + 1));
+                    //    this.Bubbles.Add(bubble);
+
+                    //    lastBubbleSpawnedAt = now;
+                    //}
+
+                    if ((lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
                     {
                         Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius + 1), rnd.Next(bubbleMinTime, bubbleMaxTime + 1));
                         this.Bubbles.Add(bubble);
 
                         lastBubbleSpawnedAt = now;
                     }
+
                 }
             }
             catch (Exception ex)
@@ -313,11 +323,11 @@ namespace Bubble_Bash
             switch (n)
             {
                 case 1:
-                    return BubbleColorRed;
+                    return bubbleColorRed;
                 case 2:
-                    return BubbleColorGreen;
+                    return bubbleColorGreen;
                 case 3:
-                    return BubbleColorBlue;
+                    return bubbleColorBlue;
                 default:
                     throw new Exception("Invalid random value: " + n);
             }

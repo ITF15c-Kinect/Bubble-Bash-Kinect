@@ -61,6 +61,16 @@ namespace Bubble_Bash.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon BB_symbol {
+            get {
+                object obj = ResourceManager.GetObject("BB_symbol", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.IO.UnmanagedMemoryStream ähnlich wie System.IO.MemoryStream.
         /// </summary>
         internal static System.IO.UnmanagedMemoryStream Popsound {
@@ -85,16 +95,6 @@ namespace Bubble_Bash.Properties {
         internal static System.Drawing.Bitmap Startscreen_BG {
             get {
                 object obj = ResourceManager.GetObject("Startscreen_BG", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Startscreen1 {
-            get {
-                object obj = ResourceManager.GetObject("Startscreen1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
