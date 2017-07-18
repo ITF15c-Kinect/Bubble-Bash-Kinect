@@ -54,7 +54,7 @@ namespace Bubble_Bash
 
         public int getGameTime()
         {
-            return (int) ((GameDuration - watch.ElapsedMilliseconds) / 1000);
+            return (int) ((gameDuration - watch.ElapsedMilliseconds) / 1000);
         }
 
         public List<Player> Players = new List<Player>();
@@ -80,7 +80,7 @@ namespace Bubble_Bash
             set { bubbles = value; }
         }
 
-        public int GameDuration = 45000;
+        public int gameDuration = 45000;
 
         private bool running;
         private Random rnd;
@@ -89,7 +89,6 @@ namespace Bubble_Bash
         private int bubbleMaxRadius = 65;
 
         private int bubbleSpawnRate = 700;
-        //private int maxBubblesCurrentlyActive = 100;
 
         private int spawnXMin = 300;
         private int spawnXMax = 1620;
@@ -118,6 +117,9 @@ namespace Bubble_Bash
         }
         #endregion
 
+        /// <summary>
+        /// thread for the game logic
+        /// </summary>
         public void run()
         {
             this.running = true;
@@ -129,7 +131,7 @@ namespace Bubble_Bash
                     checkPlayerState();
                     if (GameState == State.RUNNING)
                     {
-                        if(watch.ElapsedMilliseconds > GameDuration)
+                        if(watch.ElapsedMilliseconds > gameDuration)
                         {
                             GameState = State.SCOREBOARD;
                         }
@@ -147,7 +149,9 @@ namespace Bubble_Bash
                 throw ex;
             }
         }
-
+        /// <summary>
+        /// fades out the bubbles 
+        /// </summary>
         private void fadeOut()
         {
             lock (Bubbles)
@@ -158,8 +162,9 @@ namespace Bubble_Bash
                 }
             }
         }
-
-
+        /// <summary>
+        /// checks if a body is tracked and if the body is currently an active player otherwise adds them to the game
+        /// </summary>
         private void checkPlayerState()
         {
             if (PlayerOne != null && !PlayerOne.body.IsTracked)
@@ -195,7 +200,9 @@ namespace Bubble_Bash
             }
 
         }
-
+        /// <summary>
+        /// removes bubbles if the collision is detected
+        /// </summary>
         private void detectCollisions()
         {
             lock (Bubbles)
@@ -225,7 +232,9 @@ namespace Bubble_Bash
                 }
             }
         }
-
+        /// <summary>
+        /// detects collisions between bubbles and hands and adds score to the player
+        /// </summary>
         private bool detectCollision(Player player, Bubble bubble)
         {
             Point leftHand = this.window.getPoint(JointType.HandLeft, player.body);
@@ -249,7 +258,12 @@ namespace Bubble_Bash
             }
             return false;
         }
-
+        /// <summary>
+        /// checks if gesture matches with bubble colors
+        /// </summary>
+        /// <param name="handState"></param>
+        /// <param name="bubble"></param>
+        /// <returns></returns>
         private bool gestureMatches(HandState handState, Bubble bubble)
         {
             switch (handState)
@@ -264,7 +278,9 @@ namespace Bubble_Bash
                     return false;
             }
         }
-
+        /// <summary>
+        /// spwan bubbles with random properties at random locations
+        /// </summary>
         private void spawnBubbles()
         {
             try
@@ -273,15 +289,6 @@ namespace Bubble_Bash
 
                 lock (Bubbles)
                 {
-                    // maxBubblesCurrentlyActive not longer needed
-                    //if (Bubbles.Count < maxBubblesCurrentlyActive && (lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
-                    //{
-                    //    Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius + 1), rnd.Next(bubbleMinTime, bubbleMaxTime + 1));
-                    //    this.Bubbles.Add(bubble);
-
-                    //    lastBubbleSpawnedAt = now;
-                    //}
-
                     if ((lastBubbleSpawnedAt == null || now - lastBubbleSpawnedAt >= new TimeSpan(0, 0, 0, 0, bubbleSpawnRate)))
                     {
                         Bubble bubble = new Bubble(randomColor(), randomPosition(), rnd.Next(bubbleMinRadius, bubbleMaxRadius + 1), rnd.Next(bubbleMinTime, bubbleMaxTime + 1));
@@ -289,16 +296,16 @@ namespace Bubble_Bash
 
                         lastBubbleSpawnedAt = now;
                     }
-
                 }
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
         }
-
+        /// <summary>
+        /// despawn bubbles from drawing context if their lifespan is over
+        /// </summary>
         private void despawnBubbles()
         {
             lock (Bubbles)
@@ -306,17 +313,27 @@ namespace Bubble_Bash
                 Bubbles.RemoveAll(shouldDespawn);
             }
         }
-
+        /// <summary>
+        /// checks if the bubbles should disappear
+        /// </summary>
+        /// <param name="bubble"></param>
+        /// <returns></returns>
         private static bool shouldDespawn(Bubble bubble)
         {
             return (DateTime.Now - bubble.Created > new TimeSpan(0, 0, 0, 0, bubble.TimeToDisappear));
         }
-
+        /// <summary>
+        /// gets a random point
+        /// </summary>
+        /// <returns></returns>
         private Point randomPosition()
         {
             return new Point(rnd.Next(spawnXMin, spawnXMax), rnd.Next(bubbleMaxRadius, spawnYMax));
         }
-
+        /// <summary>
+        /// gets a random color
+        /// </summary>
+        /// <returns></returns>
         private Color randomColor()
         {
             int n = rnd.Next(1, 4);
@@ -331,9 +348,12 @@ namespace Bubble_Bash
                 default:
                     throw new Exception("Invalid random value: " + n);
             }
-
         }
-
+        /// <summary>
+        /// checks if a body has a player
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
         internal bool hasPlayerFor(Body body)
         {
             foreach (Player player in Players)
@@ -345,7 +365,10 @@ namespace Bubble_Bash
             }
             return false;
         }
-
+        /// <summary>
+        /// adds player to the player list
+        /// </summary>
+        /// <param name="player"></param>
         internal void addPlayer(Player player)
         {
             if (!Players.Contains(player))

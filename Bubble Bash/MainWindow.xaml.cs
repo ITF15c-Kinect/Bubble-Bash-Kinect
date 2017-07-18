@@ -1,22 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
 using Microsoft.Kinect;
 using System.Threading;
 
@@ -37,14 +24,15 @@ namespace Bubble_Bash
         private static readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
         private static readonly Brush handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
         public Body[] Bodies { get; internal set; }
-        #endregion
 
         private int displayWidth;
         private int displayHeight;
         private DrawingGroup drawingGroup;
 
+        //displays color camera
         private WriteableBitmap colorBitmap = null;
 
+        //constant for depth
         private const float InferredZPositionClamp = 0.1f;
         private GameController gameController;
         private Thread gameThread;
@@ -53,9 +41,11 @@ namespace Bubble_Bash
         private SolidColorBrush textBrush;
 
         public ImageSource ImageSource { get; internal set; }
+        #endregion
 
-
-
+        /// <summary>
+        /// constructor
+        /// </summary>
         public MainWindow()
         {
             HandSize = 50;
@@ -66,13 +56,19 @@ namespace Bubble_Bash
             InitializeKinect();
             InitializeComponent();
         }
-
+        /// <summary>
+        /// starts game logic
+        /// </summary>
         private void startGameThread()
         {
             this.gameThread = new Thread(this.gameController.run);
             this.gameThread.Start();
-        }        
-
+        }
+        /// <summary>
+        /// Aborts the game thread and disposes & closes kinect when window is closed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             this.gameThread.Abort();
@@ -94,7 +90,9 @@ namespace Bubble_Bash
                 this.kinectSensor = null;
             }
         }
-
+        /// <summary>
+        /// Initializes the kinect 
+        /// </summary>
         private void InitializeKinect()
         {
             this.kinectSensor = KinectSensor.GetDefault();
@@ -119,7 +117,11 @@ namespace Bubble_Bash
 
             this.DataContext = this;
         }
-
+        /// <summary>
+        /// Retrieves color frame from kinect and display the frame in the colorBitmap
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Reader_ColorFrameArrived(object sender, ColorFrameArrivedEventArgs e)
         {
             // ColorFrame is IDisposable
@@ -149,7 +151,11 @@ namespace Bubble_Bash
                 }
             }
         }
-
+        /// <summary>
+        /// Retrieves body from persons and draws them in the colorBitmap and draws the overlay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
@@ -162,7 +168,9 @@ namespace Bubble_Bash
                     {
                         this.Bodies = new Body[bodyFrame.BodyCount];
                     }
-
+                    // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
+                    // As long as those body objects are not disposed and not set to null in the array,
+                    // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.Bodies);
                     dataReceived = true;
                 }
@@ -172,6 +180,7 @@ namespace Bubble_Bash
             {
                 using (DrawingContext dc = this.drawingGroup.Open())
                 {
+                    // draws on our ColorFrame bitmap
                     dc.DrawImage(this.colorBitmap, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                     drawPlayerHands(gameController.PlayerOne,1, dc);
                     drawPlayerHands(gameController.PlayerTwo,2, dc);
@@ -186,10 +195,9 @@ namespace Bubble_Bash
                             {
                                 this.gameController.addPlayer(new Player(body));
                             }
-                            //DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), dc);
-                            //DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), dc);
-                            noHandTracked = false;
 
+                            noHandTracked = false;
+                            // starts the game from main menu
                             if (body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
                             {
                                 this.imageMenuScreen.Opacity = 0;
@@ -212,27 +220,30 @@ namespace Bubble_Bash
                             drawScoreboard(dc);
                             break;
                     }
-
-
-
+                    //pauses the game if no body is detected
                     if (noHandTracked && gameController.GameState == GameController.State.RUNNING)
                     {
                         this.gameController.GameState = GameController.State.PAUSE;
                     }
 
+                    // prevent drawing outside of our render area
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
         }
-
+        /// <summary>
+        /// draws the game timer in top mid on the screen
+        /// </summary>
+        /// <param name="dc"></param>
         private void drawTimer(DrawingContext dc)
         {
-            var typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Heavy, FontStretches.Normal);
-            Brush brush = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
             String timer = gameController.getGameTime().ToString();
-            dc.DrawText(new FormattedText(timer, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 58, brush), new Point(displayWidth / 2, 0));
+            dc.DrawText(new FormattedText(timer, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 58, textBrush), new Point(displayWidth / 2, 0));
         }
-
+        /// <summary>
+        /// draws the game scoreboard at the end of the game
+        /// </summary>
+        /// <param name="dc"></param>
         private void drawScoreboard(DrawingContext dc)
         {
             if (gameController.PlayerOne != null && gameController.PlayerTwo != null)
@@ -253,7 +264,12 @@ namespace Bubble_Bash
                 dc.DrawText(new FormattedText("Your Score:\n" + gameController.PlayerOne.score, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 72, textBrush), new Point(displayWidth / 2 - 410, displayHeight / 2 - 100));
             }
         }
-
+        /// <summary>
+        /// handles player number for multiplayer and singleplayer
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="playerNumber"></param>
+        /// <param name="dc"></param>
         private void drawPlayerHands(Player player, int playerNumber, DrawingContext dc)
         {
             if (player == null)
@@ -262,7 +278,10 @@ namespace Bubble_Bash
             DrawHand(body.HandLeftState, getPoint(JointType.HandLeft, body), playerNumber, dc);
             DrawHand(body.HandRightState, getPoint(JointType.HandRight, body), playerNumber, dc);
         }
-
+        /// <summary>
+        /// draws score for the players
+        /// </summary>
+        /// <param name="dc"></param>
         private void drawScore(DrawingContext dc)
         {
             String playerOneScore = "Player 1\n";
@@ -285,7 +304,10 @@ namespace Bubble_Bash
                 dc.DrawText(new FormattedText("Paused", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, 58, textBrush), new Point(displayWidth / 2 - 110, displayHeight / 2));
             }
         }
-
+        /// <summary>
+        /// calls the DrawBubble function to draw bubbles
+        /// </summary>
+        /// <param name="dc"></param>
         private void drawBubbles(DrawingContext dc)
         {
             var bubbles = this.gameController.Bubbles;
@@ -298,25 +320,27 @@ namespace Bubble_Bash
             }
 
         }
-
+        /// <summary>
+        /// draws bubbles on the colorFrame
+        /// </summary>
+        /// <param name="bubble"></param>
+        /// <param name="drawingContext"></param>
         private static void DrawBubble(Bubble bubble, DrawingContext drawingContext)
         {
             Color white = new Color();
-
             white = Color.FromArgb(100, 255, 255, 255);
 
-            //Brush brush = new LinearGradientBrush(white, bubble.BubbleColor, 45);
             Brush brush = new RadialGradientBrush(white, bubble.BubbleColor);
-            //Brush brush = new SolidColorBrush(Color.FromArgb(150, bubble.BubbleColor.R, bubble.BubbleColor.G, bubble.BubbleColor.B));
 
             Pen pen = new Pen(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 5);
             drawingContext.DrawEllipse(brush, pen, new Point(bubble.BubblePosition.X, bubble.BubblePosition.Y), bubble.BubbleSize, bubble.BubbleSize);
-
-            //Brush whiteBrush = new SolidColorBrush(Color.FromArgb(100,255,255,255));
-            //Point reflectionPoint = new Point(bubble.BubblePosition.X - bubble.BubbleSize / 2.5, bubble.BubblePosition.Y - bubble.BubbleSize / 3);
-            //drawingContext.DrawEllipse(brush2, null, reflectionPoint, bubble.BubbleSize/3, bubble.BubbleSize / 3);
         }
-
+        /// <summary>
+        /// joints the body and hand 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
         public Point getPoint(JointType type, Body body)
         {
             CameraSpacePoint jointPosition = body.Joints[type].Position;
@@ -324,10 +348,17 @@ namespace Bubble_Bash
             {
                 jointPosition.Z = InferredZPositionClamp;
             }
+            //solves z-angle displacement
             ColorSpacePoint jointColorSpacePoint = this.coordinateMapper.MapCameraPointToColorSpace(jointPosition);
             return new Point(jointColorSpacePoint.X, jointColorSpacePoint.Y);
         }
-
+        /// <summary>
+        /// draws the hand, according to the handstate on the body 
+        /// </summary>
+        /// <param name="handState"></param>
+        /// <param name="handPosition"></param>
+        /// <param name="playerNumber"></param>
+        /// <param name="drawingContext"></param>
         private void DrawHand(HandState handState, Point handPosition, int playerNumber, DrawingContext drawingContext)
         {
             Point p = handPosition;

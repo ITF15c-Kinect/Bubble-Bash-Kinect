@@ -7,11 +7,6 @@
         mc:Ignorable="d"
         Title="Bubble Bash Kinect" Height="350" Width="525"        
         Closing="MainWindow_Closing" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="BB symbol.ico">
-    <Window.Resources>
-        <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
-        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
-        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2" />
-    </Window.Resources>
     <Grid>
         <Viewbox HorizontalAlignment="Center" Height="Auto" Margin="0 0 0 0" VerticalAlignment="Top" Width="Auto">
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
